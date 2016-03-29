@@ -1,8 +1,13 @@
 SingleLeaveIntent {User} is leaving now
 SingleLeaveIntent {User} is heading out
-DoubleLeaveIntent {UserA} and {UserB} are leaving
+SingleLeaveIntent {User} is leaving for work
+SingleLeaveIntent {User} is heading to work
+SingleLeaveIntent {User} is off for the day
+SingleLeaveIntent {User} is heading out for the day
+SingleReturnIntent {User} has returned
 SingleReturnIntent {User} is back
 SingleReturnIntent {User} is home
-DoubleReturnIntent {UserA} and {UserB} are back
 AbsenceQueryIntent How long has {User} been gone
+AbsenceQueryIntent How long {User} has been gone
 AbsenceQueryIntent How long has {User} been away
+AbsenceQueryIntent How long {User} has been away

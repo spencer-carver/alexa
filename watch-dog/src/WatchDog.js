@@ -67,7 +67,7 @@ function onLaunch(launchRequest, session, callback) {
         ", sessionId=" + session.sessionId);
 
     // Dispatch to your skill's launch.
-    getWelcomeResponse(callback);
+    getHelpResponse(callback);
 }
 
 /**
@@ -83,18 +83,16 @@ function onIntent(intentRequest, session, callback) {
     // Dispatch to your skill's intent handlers
     if ("SingleLeaveIntent" === intentName) {
         singleLeavingReply(intent, session, callback);
-    } else if ("DoubleLeaveIntent" === intentName) {
-        multiLeavingReply(intent, session, callback);
     } else if ("SingleReturnIntent" === intentName) {
         singleReturnReply(intent, session, callback);
-    } else if ("DoubleReturnIntent" === intentName) {
-        multiReturnReply(intent, session, callback);
     } else if ("AbsenceQueryIntent" === intentName) {
         queryReply(intent, session, callback);
     } else if ("AMAZON.HelpIntent" === intentName) {
         getHelpResponse(callback);
     } else if ("AMAZON.StopIntent" === intentName) {
         getStopResponse(callback);
+    } else if ("AMAZON.CancelIntent" === intentName) {
+        getCancelResponse(callback);
     } else {
         throw "Invalid intent";
     }
@@ -120,13 +118,21 @@ function getStopResponse(callback) {
     callback({}, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
 }
 
-function getWelcomeResponse(callback) {
+function getCancelResponse(callback) {
+    var cardTitle = "Cancel";
+    var speechOutput = "Watchdog command cancelled. Exiting.";
+    var repromptText = "";
+    var shouldEndSession = true;
+    callback({}, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
+}
+
+function getHelpResponse(callback) {
     // If we wanted to initialize the session to have some attributes we could add those here.
     var sessionAttributes = {};
-    var cardTitle = "Welcome";
-    var speechOutput = "Watchdog is eagerly awaiting a command.";
-    var repromptText = "Watchdog is chasing its tail waiting for a command...";
-    var shouldEndSession = false;
+    var cardTitle = "Watchdog Help";
+    var speechOutput = "Start Watchdog tracking by saying 'tell WatchDog Someone is leaving'. Finish a session with 'tell Watchdog Someone is back'";
+    var repromptText = "You can also check how long tracked people have been away with 'ask WatchDog How long has Someone been away'";
+    var shouldEndSession = true;
 
     callback(sessionAttributes,
         buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
@@ -136,48 +142,40 @@ function getWelcomeResponse(callback) {
  * Echo
  */
 function singleLeavingReply(intent, session, callback) {
+    var user = intent.slots.User;
     var options = {
-        cardTitle: intent.name,
+        cardTitle: "" + user.value + " is leaving",
         speechOutput: "",
         repromptText: "",
         sessionAttributes: {},
         shouldEndSession: true
     };
-    var user = intent.slots.User;
     
     personLeaving(options, user, callback);
 }
 
-function multiLeavingReply(intent, session, callback) {
-    // TODO
-}
-
 function singleReturnReply(intent, session, callback) {
+    var user = intent.slots.User;
     var options = {
-        cardTitle: intent.name,
+        cardTitle: "" + user.value + " has returned",
         speechOutput: "",
         repromptText: "",
         sessionAttributes: {},
         shouldEndSession: true
     };
-    var user = intent.slots.User;
     
     personReturning(options, user, callback);
 }
 
-function multiReturnReply(intent, session, callback) {
-    // TODO
-}
-
 function queryReply(intent, session, callback) {
+    var user = intent.slots.User;
     var options = {
-        cardTitle: intent.name,
+        cardTitle: "How long has " + user.value + " been away?",
         speechOutput: "",
         repromptText: "",
         sessionAttributes: {},
         shouldEndSession: true
     };
-    var user = intent.slots.User;
     
     queryPersonStatus(options, user, callback);
 }
@@ -185,7 +183,7 @@ function queryReply(intent, session, callback) {
 // -------------- Helpers that manage database interactions ----------------------
 
 function personLeaving(options, user, callback) {
-    //Setup Database
+    //Configure DB query
     var tableName = "departureTimes";
     var now = new Date();
     var item = {
@@ -208,7 +206,7 @@ function personLeaving(options, user, callback) {
 }
 
 function personReturning(options, user, callback) {
-    //Setup Database
+    //Configure DB Query
     var tableName = "departureTimes";
     var key = {
         "username": user.value
@@ -230,7 +228,7 @@ function personReturning(options, user, callback) {
     });
 }
 function queryPersonStatus(options, user, callback) {
-    //Setup Database
+    //Configure DB Query
     var tableName = "departureTimes";
     var key = {
         "username": user.value
@@ -345,8 +343,8 @@ function buildSpeechletResponse(title, output, repromptText, shouldEndSession) {
         },
         card: {
             type: "Simple",
-            title: "SessionSpeechlet - " + title,
-            content: "SessionSpeechlet - " + output
+            title: title,
+            content: output
         },
         reprompt: {
             outputSpeech: {

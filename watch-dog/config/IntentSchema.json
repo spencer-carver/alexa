@@ -10,36 +10,10 @@
      ]
     },
     {
-      "intent": "DoubleLeaveIntent",
-      "slots": [
-      {
-        "name" : "UserA",
-        "type": "AMAZON.US_FIRST_NAME"
-      },
-      {
-        "name" : "UserB",
-        "type": "AMAZON.US_FIRST_NAME"
-      }
-     ]
-    },
-    {
       "intent": "SingleReturnIntent",
       "slots": [
       {
         "name" : "User",
-        "type": "AMAZON.US_FIRST_NAME"
-      }
-     ]
-    },
-    {
-      "intent": "DoubleReturnIntent",
-      "slots": [
-      {
-        "name" : "UserA",
-        "type": "AMAZON.US_FIRST_NAME"
-      },
-      {
-        "name" : "UserB",
         "type": "AMAZON.US_FIRST_NAME"
       }
      ]
@@ -58,6 +32,9 @@
     },
     {
       "intent": "AMAZON.StopIntent"
+    },
+    {
+      "intent": "AMAZON.CancelIntent"
     }
   ]
 }
