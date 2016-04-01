@@ -4,12 +4,16 @@ This application stores a name associated with a user from the list of names ava
 
 
 
+# v0.0.3
 
+Fixes based on Amazon Skill Feedback.
+Changed default (Help) Intent to not end session. Added Sample Utterance for just a username that performs a query.
 
-## v0.0.2
+# v0.0.2
 
-Fixes based on Amazon Skill Feedback. Added Help/Cancel Intents, and cleaned up the Sample Utterances and card text.
+Fixes based on Amazon Skill Feedback.
+Added Help/Cancel Intents, and cleaned up the Sample Utterances and card text.
 
-## v0.0.1
+# v0.0.1
 
 Basic functionality

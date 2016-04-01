@@ -130,9 +130,12 @@ function getHelpResponse(callback) {
     // If we wanted to initialize the session to have some attributes we could add those here.
     var sessionAttributes = {};
     var cardTitle = "Watchdog Help";
-    var speechOutput = "Start Watchdog tracking by saying 'tell WatchDog Someone is leaving'. Finish a session with 'tell Watchdog Someone is back'";
-    var repromptText = "You can also check how long tracked people have been away with 'ask WatchDog How long has Someone been away'";
-    var shouldEndSession = true;
+    var speechOutput = "Start Watchdog tracking by telling WatchDog 'Someone is leaving'. " + 
+        "Finish a session by telling WatchDog 'Someone is back'. " + 
+        "You can also check how long tracked people have been away by asking WatchDog " + 
+        "'How long has Someone been away'.";
+    var repromptText = "Try issuing WatchDog a command now.";
+    var shouldEndSession = false;
 
     callback(sessionAttributes,
         buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));

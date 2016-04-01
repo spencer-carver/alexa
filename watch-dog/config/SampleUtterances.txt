@@ -11,3 +11,4 @@ AbsenceQueryIntent How long has {User} been gone
 AbsenceQueryIntent How long {User} has been gone
 AbsenceQueryIntent How long has {User} been away
 AbsenceQueryIntent How long {User} has been away
+AbsenceQueryIntent {User}
