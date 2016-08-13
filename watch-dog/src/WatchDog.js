@@ -67,7 +67,7 @@ function onLaunch(launchRequest, session, callback) {
         ", sessionId=" + session.sessionId);
 
     // Dispatch to your skill's launch.
-    getHelpResponse(callback);
+    getWelcomeResponse(callback);
 }
 
 /**
@@ -126,13 +126,27 @@ function getCancelResponse(callback) {
     callback({}, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
 }
 
+function getWelcomeResponse(callback) {
+    // If we wanted to initialize the session to have some attributes we could add those here.
+    var sessionAttributes = {};
+    var cardTitle = "Welcome to Watchdog";
+    var speechOutput = "Watchdog is a tool to help you track how long you've been away. " +
+        "You can also ask how long it has been since someone else left. " +
+        "For sample commands, say 'help'. Otherwise, try issuing a command now.";
+    var repromptText = "For sample commands, say 'help'. Otherwise, try issuing a command now.";
+    var shouldEndSession = false;
+
+    callback(sessionAttributes,
+        buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
+}
+
 function getHelpResponse(callback) {
     // If we wanted to initialize the session to have some attributes we could add those here.
     var sessionAttributes = {};
     var cardTitle = "Watchdog Help";
-    var speechOutput = "Start Watchdog tracking by telling WatchDog 'Someone is leaving'. " + 
-        "Finish a session by telling WatchDog 'Someone is back'. " + 
-        "You can also check how long tracked people have been away by asking WatchDog " + 
+    var speechOutput = "Start Watchdog tracking by telling WatchDog 'Someone is leaving'. " +
+        "Finish a session by telling WatchDog 'Someone is back'. " +
+        "You can also check how long tracked people have been away by asking WatchDog " +
         "'How long has Someone been away'.";
     var repromptText = "Try issuing WatchDog a command now.";
     var shouldEndSession = false;
@@ -153,8 +167,8 @@ function singleLeavingReply(intent, session, callback) {
         sessionAttributes: {},
         shouldEndSession: true
     };
-    
-    personLeaving(options, user, callback);
+
+    personLeaving(options, session, user, callback);
 }
 
 function singleReturnReply(intent, session, callback) {
@@ -166,8 +180,8 @@ function singleReturnReply(intent, session, callback) {
         sessionAttributes: {},
         shouldEndSession: true
     };
-    
-    personReturning(options, user, callback);
+
+    personReturning(options, session, user, callback);
 }
 
 function queryReply(intent, session, callback) {
@@ -179,18 +193,18 @@ function queryReply(intent, session, callback) {
         sessionAttributes: {},
         shouldEndSession: true
     };
-    
-    queryPersonStatus(options, user, callback);
+
+    queryPersonStatus(options, session, user, callback);
 }
 
 // -------------- Helpers that manage database interactions ----------------------
 
-function personLeaving(options, user, callback) {
+function personLeaving(options, session, user, callback) {
     //Configure DB query
     var tableName = "departureTimes";
     var now = new Date();
     var item = {
-        "username": user.value,
+        "username": session.user.userId + "~" + user.value,
         "dateTime": now.toString()
     };
 
@@ -208,11 +222,11 @@ function personLeaving(options, user, callback) {
     });
 }
 
-function personReturning(options, user, callback) {
+function personReturning(options, session, user, callback) {
     //Configure DB Query
     var tableName = "departureTimes";
     var key = {
-        "username": user.value
+        "username": session.user.userId + "~" + user.value
     };
 
     var params = {
@@ -226,15 +240,21 @@ function personReturning(options, user, callback) {
         } else if (data.Item === undefined) {
             processEmptyResponse(options, user.value, callback);
         } else {
-            processReturnData(options, data.Item, callback);
+            dynamo.deleteItem(params, function(err2, removedData) {
+                if (err2) {
+                    console.log("err2" + err2);
+                }
+                processReturnData(options, data.Item, callback);
+            });
+
         }
     });
 }
-function queryPersonStatus(options, user, callback) {
+function queryPersonStatus(options, session, user, callback) {
     //Configure DB Query
     var tableName = "departureTimes";
     var key = {
-        "username": user.value
+        "username": session.user.userId + "~" + user.value
     };
 
     var params = {
@@ -248,7 +268,7 @@ function queryPersonStatus(options, user, callback) {
         } else if (data.Item === undefined) {
             processEmptyResponse(options, user.value, callback);
         } else {
-            processQueryData(options, data.Item, callback);
+            processQueryData(options, user.value, data.Item, callback);
         }
     });
 }
@@ -257,9 +277,9 @@ function processLeaveData(options, row, callback) {
     var speechOutput = "Have a good day!";
 
     callback(options.sessionAttributes,
-        buildSpeechletResponse( options.cardTitle, 
-                                speechOutput, 
-                                options.repromptText, 
+        buildSpeechletResponse( options.cardTitle,
+                                speechOutput,
+                                options.repromptText,
                                 options.shouldEndSession));
 }
 
@@ -271,23 +291,23 @@ function processReturnData(options, row, callback) {
     var speechOutput =  "Welcome back. You have been gone for " + awayTime;
 
     callback(options.sessionAttributes,
-        buildSpeechletResponse( options.cardTitle, 
-                                speechOutput, 
-                                options.repromptText, 
+        buildSpeechletResponse( options.cardTitle,
+                                speechOutput,
+                                options.repromptText,
                                 options.shouldEndSession));
 }
 
-function processQueryData(options, row, callback) {
+function processQueryData(options, username, row, callback) {
     var departureTime = new Date(row.dateTime);
     var returnTime = new Date();
 
     var awayTime = getDifference(departureTime, returnTime);
-    var speechOutput =  "My records indicate that " + row.username + " has been gone for " + awayTime;
+    var speechOutput =  "My records indicate that " + username + " has been gone for " + awayTime;
 
     callback(options.sessionAttributes,
-        buildSpeechletResponse( options.cardTitle, 
-                                speechOutput, 
-                                options.repromptText, 
+        buildSpeechletResponse( options.cardTitle,
+                                speechOutput,
+                                options.repromptText,
                                 options.shouldEndSession));
 }
 
@@ -295,9 +315,9 @@ function processEmptyResponse(options, name, callback) {
     var speechOutput =  "Unfortunately my records don't seem to have a departure time saved for "+ name;
 
     callback(options.sessionAttributes,
-        buildSpeechletResponse( options.cardTitle, 
-                                speechOutput, 
-                                options.repromptText, 
+        buildSpeechletResponse( options.cardTitle,
+                                speechOutput,
+                                options.repromptText,
                                 options.shouldEndSession));
 }
 
@@ -305,9 +325,9 @@ function processError(options, callback) {
     var speechOutput =  "Whoops, something went wrong. Please try again.";
 
     callback(options.sessionAttributes,
-        buildSpeechletResponse( options.cardTitle, 
-                                speechOutput, 
-                                options.repromptText, 
+        buildSpeechletResponse( options.cardTitle,
+                                speechOutput,
+                                options.repromptText,
                                 options.shouldEndSession));
 }
 
@@ -321,10 +341,10 @@ function getDifference(date1, date2) {
   //take out milliseconds
   difference_ms = difference_ms/1000;
   var seconds = Math.floor(difference_ms % 60);
-  difference_ms = difference_ms/60; 
+  difference_ms = difference_ms/60;
   var minutes = Math.floor(difference_ms % 60);
-  difference_ms = difference_ms/60; 
-  var hours = Math.floor(difference_ms % 24);  
+  difference_ms = difference_ms/60;
+  var hours = Math.floor(difference_ms % 24);
   var days = Math.floor(difference_ms/24);
 
   var output = "";

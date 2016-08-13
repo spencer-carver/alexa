@@ -1,3 +1,4 @@
+SingleLeaveIntent {User} is leaving
 SingleLeaveIntent {User} is leaving now
 SingleLeaveIntent {User} is heading out
 SingleLeaveIntent {User} is leaving for work

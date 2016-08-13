@@ -1,8 +1,13 @@
 ## Privacy Policy
 
-This application stores a name associated with a user from the list of names available in AMAZON.US_FIRST_NAMES. In order to make the app better serve the user, this information will eventually be combined with a unique identifier to the user's session, so that two users with the same first name won't overwrite eachother's times.
+This application stores a name associated with a user from the list of names available in AMAZON.US_FIRST_NAMES. In order to make the app better serve the user, this information combined with a unique identifier (userId) from the user's session, so that two users with the same first name won't overwrite eachother's entries.
 
+# v0.0.4
 
+Fixes based on Amazon Skill Feedback.
+Added unique Welcome Intent for when skill is started without specifying a command. Ties into Help Intent.
+Added delete from db when return query completes.
+Changed db storage to be `userId~name` instead of just name to prevent collisions.
 
 # v0.0.3
 
