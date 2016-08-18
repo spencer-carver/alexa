@@ -4,6 +4,10 @@ This application stores a name associated with a user from the list of names ava
 
 This information is stored in a dynamoDB table used only for this application, and the entries are removed when the user indicates they have returned. Entries are stored for the sole purpose of being queriable  while they are gone and upon return.
 
+# v1.0.0 - 2016-08-18
+
+* Accepted to Amazon Alexa Skills Portal
+
 # v0.0.4
 
 * Fixes based on Amazon Skill Feedback.
